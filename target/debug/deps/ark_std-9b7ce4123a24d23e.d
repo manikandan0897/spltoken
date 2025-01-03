@@ -1,0 +1,12 @@
+/home/clarisco/Desktop/dummyproject/token_solana/target/debug/deps/libark_std-9b7ce4123a24d23e.rmeta: /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/lib.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/io/mod.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/io/error.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/error.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/rand_helper.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/perf_trace.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/iterable/mod.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/iterable/rev.rs
+
+/home/clarisco/Desktop/dummyproject/token_solana/target/debug/deps/ark_std-9b7ce4123a24d23e.d: /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/lib.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/io/mod.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/io/error.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/error.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/rand_helper.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/perf_trace.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/iterable/mod.rs /home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/iterable/rev.rs
+
+/home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/lib.rs:
+/home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/io/mod.rs:
+/home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/io/error.rs:
+/home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/error.rs:
+/home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/rand_helper.rs:
+/home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/perf_trace.rs:
+/home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/iterable/mod.rs:
+/home/clarisco/.cargo/registry/src/index.crates.io-6f17d22bba15001f/ark-std-0.4.0/src/iterable/rev.rs:
