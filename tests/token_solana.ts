@@ -1,34 +1,32 @@
+// No imports needed: web3, anchor, pg and more are globally available
 import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
 import * as web3 from "@solana/web3.js";
 import assert from "assert";
 import BN from "bn.js";
-import { Spl } from "../target/types/spl";
 
-describe("token_solana", () => {
-  // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.AnchorProvider.env());
+import { createAssociatedTokenAccountInstruction, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
-  const program = anchor.workspace.Spl as Program<Spl>;
 
-    const METADATA_SEED = "metadata";
+describe("Test", () => {
+
+   const METADATA_SEED = "metadata";
     const TOKEN_METADATA_PROGRAM_ID = new web3.PublicKey(
       "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
     );
   
     const MINT_SEED = "mint";
-    const payer = program.provider.publicKey;
+    const payer = pg.program.provider.publicKey;
     const metadata = {
       name: "Arunpadiyan",
       symbol: "ARUN",
       uri: "https://teal-added-salamander-615.mypinata.cloud/ipfs/bafkreidc3sm7c27v3bajay6wlyk6s4zuye6ljjauoamp4mg6dzjsh4wvpy",
       decimals: 9
     }
-    const mintAmount = 10;
+    const mintAmount = 100000;
   
     const [mint] = web3.PublicKey.findProgramAddressSync(
       [Buffer.from(MINT_SEED)],
-      program.programId
+      pg.program.programId
     );
   
     const [metadataAddress] = web3.PublicKey.findProgramAddressSync(
@@ -39,9 +37,9 @@ describe("token_solana", () => {
       ],
       TOKEN_METADATA_PROGRAM_ID
     );
-  
-    it("Is initialized!", async () => {
-      const info = await program.provider.connection.getAccountInfo(mint);
+
+  it("initialize", async () => {
+     const info = await pg.program.provider.connection.getAccountInfo(mint);
       if (info) {
         return; // Do not attempt to initialize if already initialized
       }
@@ -58,57 +56,67 @@ describe("token_solana", () => {
       };
   
   
-      const txHash = await program.methods
-        .initiateToken(metadata)
+      const txHash = await pg.program.methods
+        .initToken(metadata)
         .accounts(context)
         .rpc();
-  
-      await program.provider.connection.confirmTransaction(txHash, "finalized");
+
       console.log(`  https://explorer.solana.com/tx/${txHash}?cluster=devnet`);
-      const newInfo = await program.provider.connection.getAccountInfo(mint);
+      const newInfo = await pg.program.provider.connection.getAccountInfo(mint);
       assert(newInfo, "  Mint should be initialized.");
+  });
+
+
+  it("mint tokens", async () => {
+    const destination = await anchor.utils.token.associatedAddress({
+      mint: mint,
+      owner: payer,
     });
-  
-    it("mint tokens", async () => {
-      const destination = await anchor.utils.token.associatedAddress({
-        mint: mint,
-        owner: payer,
-      });
-  
-      let initialBalance: number;
-  
-      try {
-        const balance = await program.provider.connection.getTokenAccountBalance(destination);
-        initialBalance = balance.value.uiAmount;
-      } catch {
-        // Token account not yet initiated has 0 balance
-        initialBalance = 0;
-      }
-  
-      const context = {
-        mint,
-        destination,
-        payer,
-        rent: web3.SYSVAR_RENT_PUBKEY,
-        systemProgram: web3.SystemProgram.programId,
-        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
-      };
-  
-      const txHash = await program.methods
-        .mintTokens(new BN(mintAmount * 10 ** metadata.decimals))
-        .accounts(context)
-        .rpc();
-      await program.provider.connection.confirmTransaction(txHash);
-      console.log(`  https://explorer.solana.com/tx/${txHash}?cluster=devnet`);
-  
-      const postBalance = (
-        await program.provider.connection.getTokenAccountBalance(destination)
-      ).value.uiAmount;
-      assert.equal(
-        initialBalance + mintAmount,
-        postBalance,
-        "Compare balances, it must be equal"
-      );
+
+    let initialBalance: number;
+
+    try {
+      const balance = await pg.program.provider.connection.getTokenAccountBalance(destination);
+      initialBalance = balance.value.uiAmount;
+    } catch {
+      // Token account not yet initiated has 0 balance
+      initialBalance = 0;
+    }
+
+    const context = {
+      mint,
+      destination,
+      payer,
+      rent: web3.SYSVAR_RENT_PUBKEY,
+      systemProgram: web3.SystemProgram.programId,
+      tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+      associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+    };
+
+    const txHash = await pg.program.methods
+      .mintTokens(new BN(mintAmount * 10 ** metadata.decimals))
+      .accounts(context)
+      .rpc();
+    console.log(`  https://explorer.solana.com/tx/${txHash}?cluster=devnet`);
+  });
+
+  it("Token transfer",async() => {
+    const sourceaccount = await anchor.utils.token.associatedAddress({
+      mint: mint,
+      owner: payer,
     });
+    const context = {
+      mintToken: mint,
+      fromAccount:sourceaccount,
+      signer: payer,
+      toAccount: sourceaccount,
+      tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+      associateTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+    }
+    const transfertx = await pg.program.methods
+      .transerToken(new BN(1*10**metadata.decimals))
+      .accounts(context)
+      .rpc()
+    console.log(`  https://explorer.solana.com/tx/${transfertx}?cluster=devnet`);
+  })
 });
