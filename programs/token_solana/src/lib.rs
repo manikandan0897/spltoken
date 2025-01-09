@@ -1,20 +1,26 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
+    token::{mint_to, Mint, MintTo, Token, TokenAccount,transfer, 
+        Transfer,burn,Burn},
     metadata::{
-        create_metadata_accounts_v3, mpl_token_metadata::types::DataV2, CreateMetadataAccountsV3,
+        create_metadata_accounts_v3,
+        mpl_token_metadata::types::DataV2,
+        CreateMetadataAccountsV3, 
         Metadata as Metaplex,
     },
-    token::{mint_to, Mint, MintTo, Token, TokenAccount},
 };
-declare_id!("11111111111111111111111111111111");
+
+declare_id!("3GddYiQrvpDCdRVkpRDr9iH8GAHGzSDMkU6VDX7kx3Gd");
+
 
 #[program]
-mod spl {
+pub mod spltoken {
+    
     use super::*;
 
-    pub fn initiate_token(_ctx: Context<InitToken>, metadata: InitTokenParams) -> Result<()> {
-        let seeds = &["mint".as_bytes(), &[_ctx.bumps.mint]];
+    pub fn init_token(ctx: Context<InitToken>, metadata: InitTokenParams) -> Result<()> {
+       let seeds = &["mint".as_bytes(), &[ctx.bumps.mint]];
         let signer = [&seeds[..]];
 
         let token_data: DataV2 = DataV2 {
@@ -28,24 +34,31 @@ mod spl {
         };
 
         let metadata_ctx = CpiContext::new_with_signer(
-            _ctx.accounts.token_metadata_program.to_account_info(),
+            ctx.accounts.token_metadata_program.to_account_info(),
             CreateMetadataAccountsV3 {
-                payer: _ctx.accounts.payer.to_account_info(),
-                update_authority: _ctx.accounts.mint.to_account_info(),
-                mint: _ctx.accounts.mint.to_account_info(),
-                metadata: _ctx.accounts.metadata.to_account_info(),
-                mint_authority: _ctx.accounts.mint.to_account_info(),
-                system_program: _ctx.accounts.system_program.to_account_info(),
-                rent: _ctx.accounts.rent.to_account_info(),
+                payer: ctx.accounts.payer.to_account_info(),
+                update_authority: ctx.accounts.mint.to_account_info(),
+                mint: ctx.accounts.mint.to_account_info(),
+                metadata: ctx.accounts.metadata.to_account_info(),
+                mint_authority: ctx.accounts.mint.to_account_info(),
+                system_program: ctx.accounts.system_program.to_account_info(),
+                rent: ctx.accounts.rent.to_account_info(),
             },
-            &signer,
+            &signer
         );
 
-        create_metadata_accounts_v3(metadata_ctx, token_data, false, true, None)?;
+        create_metadata_accounts_v3(
+            metadata_ctx,
+            token_data,
+            false,
+            true,
+            None,
+        )?;
 
         msg!("Token mint created successfully.");
         Ok(())
     }
+
 
     pub fn mint_tokens(ctx: Context<MintTokens>, quantity: u64) -> Result<()> {
         let seeds = &["mint".as_bytes(), &[ctx.bumps.mint]];
@@ -67,13 +80,44 @@ mod spl {
         Ok(())
     }
 
+
+    pub fn transer_token(ctx: Context<TransferToken>,amount:u64)->Result<()>{
+        msg!("Started {:} tokens transfer from account {:} to {:}",amount,ctx.accounts.from_account.key(),ctx.accounts.to_account.key());
+        transfer(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(), 
+                Transfer{authority:ctx.accounts.signer.to_account_info(),
+                from:ctx.accounts.from_account.to_account_info(),
+                to:ctx.accounts.to_account.to_account_info()}
+            ), 
+            amount
+        )?;
+        Ok(())
+    }
+
+
+    pub fn burn_token(ctx: Context<BurnToken>,amount:u64)->Result<()>{
+        burn(
+            CpiContext::new(
+                ctx.accounts.token_program.to_account_info(), 
+                Burn{
+                    authority:ctx.accounts.signer.to_account_info(),
+                    from:ctx.accounts.token_account.to_account_info(),
+                    mint:ctx.accounts.mint_token.to_account_info()
+                }
+            ), 
+            amount
+        )?;
+        Ok(())
+    }
+
 }
+
 
 #[derive(Accounts)]
 #[instruction(params: InitTokenParams)]
 pub struct InitToken<'info> {
-    #[account(mut)]
-    /// CHECK: UncheckedAccount
+   #[account(mut)]
     pub metadata: UncheckedAccount<'info>,
     #[account(
         init,
@@ -94,7 +138,7 @@ pub struct InitToken<'info> {
 
 #[derive(Accounts)]
 pub struct MintTokens<'info> {
-    #[account(
+  #[account(
         mut,
         seeds = [b"mint"],
         bump,
@@ -116,6 +160,34 @@ pub struct MintTokens<'info> {
     pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
+
+#[derive(Accounts)]
+pub struct TransferToken<'info>{    
+    #[account(mut)]
+    pub mint_token:Account<'info,Mint>,
+    #[account(mut)]
+    pub from_account:Account<'info,TokenAccount>,
+    #[account(mut)]
+    pub to_account:Account<'info,TokenAccount>,
+    #[account(mut)]
+    pub signer:Signer<'info>,
+    pub system_program:Program<'info,System>,
+    pub token_program:Program<'info,Token>,
+    pub associate_token_program:Program<'info,AssociatedToken>,
+}
+
+#[derive(Accounts)]
+pub struct BurnToken<'info> {
+    #[account(mut)]
+    pub mint_token:Account<'info,Mint>,
+    #[account(mut)]
+    pub signer:Signer<'info>,
+    #[account(mut)]
+    pub token_account:Account<'info,TokenAccount>,
+    pub token_program:Program<'info,Token>,
+}
+
+// 5. Define the init token params
 #[derive(AnchorSerialize, AnchorDeserialize, Debug, Clone)]
 pub struct InitTokenParams {
     pub name: String,
@@ -123,5 +195,3 @@ pub struct InitTokenParams {
     pub uri: String,
     pub decimals: u8,
 }
-
-pub struct Initialize {}
